@@ -1,0 +1,98 @@
+/* ==========================================================
+   Agenda do dia - complementa o style.css
+   ========================================================== */
+
+/* ---------- Títulos ---------- */
+/* só a primeira letra maiúscula: "Segunda, 2 de novembro"
+   (capitalize deixaria "2 De Novembro", errado em português) */
+.nav h2 {
+  text-transform: none;
+}
+
+.nav h2::first-letter {
+  text-transform: uppercase;
+}
+
+/* ---------- Aviso de domingo ---------- */
+.aviso {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--ash);
+}
+
+/* ---------- Dias da semana ---------- */
+/* no celular os seis dias não cabem: a faixa rola para o lado, encaixa em cada dia
+   e o último botão aparece cortado na borda, mostrando que há mais à direita */
+.week {
+  position: relative; /* referência para centralizar o dia escolhido (agenda.js) */
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 20px 0 0;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+}
+
+.day {
+  flex: 0 0 auto;
+  min-width: 104px;
+  padding: 10px;
+  text-align: center;
+  scroll-snap-align: start;
+}
+
+.day b {
+  display: block;
+  font: 800 30px/1 var(--display);
+  letter-spacing: 0;
+}
+
+.day i {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ---------- Filtros ---------- */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* "Marcar folga" fica no canto direito, separado dos filtros */
+.filters .ver {
+  margin-left: auto;
+}
+
+/* ---------- Horário livre ---------- */
+/* cinza em vez de transparência: continua mais apagado que os atendimentos,
+   mas com contraste de 8:1 (a opacidade antiga deixava 4,2:1) */
+li.free {
+  color: var(--ash);
+  padding: 10px 0;
+}
+
+li.free time {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+li.free .who {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .week {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calendário de agendamentos | Barbearia Britos</title>
+<meta name="description" content="Painel interno da Barbearia Britos com a visão mensal dos agendamentos.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0c0d0e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="img/emblema-branco.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Britos">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/calendario.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Britos, agenda do dia"><img src="img/emblema-branco.png" alt="" width="31" height="34"><span>Britos</span></a>
+    <nav class="links" aria-label="Páginas do painel">
+      <a class="link" href="index.html">Agenda<span class="longo"> do dia</span></a>
+      <a class="link" href="calendario.html" aria-current="page">Calendário</a>
+      <a class="link" href="folgas.html">Folgas</a>
+    </nav>
+  </div>
+</header>
+<div class="tri" aria-hidden="true"></div>
+<noscript><p class="sem-js">Este painel precisa do JavaScript ativado no navegador para mostrar os agendamentos.</p></noscript>
+<main>
+  <div class="wrap">
+    <span class="eyebrow">Painel do barbeiro</span>
+    <h1>Calendário</h1>
+    <div class="nav">
+      <button class="chip" id="prev" type="button" aria-label="Mês anterior">Anterior</button>
+      <button class="chip" id="hoje" type="button">Hoje</button>
+      <button class="chip" id="next" type="button" aria-label="Próximo mês">Próximo</button>
+      <h2 id="titulo-mes" aria-live="polite"></h2>
+    </div>
+
+    <div class="stats" role="group" aria-label="Resumo do mês">
+      <div class="stat"><p>Agendamentos no mês</p><strong id="s-qtd">0</strong></div>
+      <div class="stat"><p>Receita prevista</p><strong id="s-rec">R$ 0</strong></div>
+      <div class="stat"><p>Dia mais cheio</p><strong id="s-cheio">-</strong><small id="s-cheio2"></small></div>
+    </div>
+
+    <div class="wd" aria-hidden="true"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
+    <div class="cal" id="cal" role="group" aria-label="Dias do mês"></div>
+
+    <h2 class="det" id="det-titulo" tabindex="-1"></h2>
+    <p class="note" id="det-info" aria-live="polite"></p>
+    <div class="acoes">
+      <a class="chip ver" id="det-link" href="index.html">Abrir na agenda do dia</a>
+      <a class="chip ver" id="det-folga" href="folgas.html">Marcar folga neste dia</a>
+    </div>
+    <ul id="lista"></ul>
+  </div>
+</main>
+<script src="js/script.js" defer></script>
+<script src="js/calendario.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Configuração local do Claude Code (permissões desta máquina)
+.claude/settings.local.json
+
+# Variáveis de ambiente e segredos, caso algum dia sejam criados aqui
+.env
+.env.*
+!.env.example
+
+# Dependências e saídas de build (o projeto hoje não usa, mas evita subir por engano)
+node_modules/
+dist/
+.vercel/
+
+# Banco de dados local: contém nomes e telefones de clientes
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos do sistema e de editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

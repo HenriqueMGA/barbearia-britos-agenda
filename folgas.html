@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Folgas | Barbearia Britos</title>
+<meta name="description" content="Painel interno da Barbearia Britos para marcar e remover folgas dos barbeiros.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0c0d0e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="img/emblema-branco.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Britos">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/folgas.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Britos, agenda do dia"><img src="img/emblema-branco.png" alt="" width="31" height="34"><span>Britos</span></a>
+    <nav class="links" aria-label="Páginas do painel">
+      <a class="link" href="index.html">Agenda<span class="longo"> do dia</span></a>
+      <a class="link" href="calendario.html">Calendário</a>
+      <a class="link" href="folgas.html" aria-current="page">Folgas</a>
+    </nav>
+  </div>
+</header>
+<div class="tri" aria-hidden="true"></div>
+<noscript><p class="sem-js">Este painel precisa do JavaScript ativado no navegador para mostrar os agendamentos.</p></noscript>
+<main>
+  <div class="wrap">
+    <span class="eyebrow">Painel do barbeiro</span>
+    <h1>Folgas</h1>
+
+    <form class="form light" id="form-folga">
+      <h2 class="sec" id="f-titulo" tabindex="-1">Marcar folga</h2>
+
+      <div class="campo">
+        <span class="rotulo" id="tipo-rotulo">Tipo de folga</span>
+        <div class="tipos" role="group" aria-labelledby="tipo-rotulo">
+          <button class="chip" type="button" data-tipo="horas" aria-pressed="true">Algumas horas</button>
+          <button class="chip" type="button" data-tipo="dia" aria-pressed="false">Dia inteiro</button>
+          <button class="chip" type="button" data-tipo="periodo" aria-pressed="false">Vários dias</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="f-barbeiro">Barbeiro</label>
+        <select id="f-barbeiro" required>
+          <option value="">Carregando…</option>
+        </select>
+      </div>
+
+      <div class="campo" data-para="horas dia">
+        <label for="f-data">Dia</label>
+        <input type="date" id="f-data" required>
+      </div>
+
+      <div class="linha" data-para="horas">
+        <div class="campo">
+          <label for="f-hini">Das</label>
+          <input type="time" id="f-hini" value="12:00" required>
+        </div>
+        <div class="campo">
+          <label for="f-hfim">Até</label>
+          <input type="time" id="f-hfim" value="13:00" required>
+        </div>
+      </div>
+
+      <div class="linha" data-para="periodo" hidden>
+        <div class="campo">
+          <label for="f-de">Primeiro dia</label>
+          <input type="date" id="f-de">
+        </div>
+        <div class="campo">
+          <label for="f-ate">Último dia</label>
+          <input type="date" id="f-ate">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="f-motivo">Motivo <span class="opc">(opcional)</span></label>
+        <input type="text" id="f-motivo" maxlength="200" placeholder="Ex.: consulta médica, férias">
+      </div>
+
+      <div class="botoes-form">
+        <button class="chip cheio" type="submit" id="f-enviar">Marcar folga</button>
+        <button class="chip" type="button" id="f-cancelar" hidden>Cancelar edição</button>
+      </div>
+      <p class="msg" id="f-msg" role="status" aria-live="polite"></p>
+    </form>
+
+    <h2 class="sec">Próximas folgas</h2>
+    <ul id="lista-folgas"></ul>
+  </div>
+</main>
+<script src="js/script.js" defer></script>
+<script src="js/folgas.js" defer></script>
+</body>
+</html>

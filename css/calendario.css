@@ -1,0 +1,200 @@
+/* ==========================================================
+   Calendário - complementa o style.css
+   ========================================================== */
+
+/* ---------- Títulos ---------- */
+.det {
+  margin-top: 44px;
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 900;
+}
+
+.det + .note {
+  margin: 12px 0 14px;
+}
+
+/* atalhos do dia escolhido: agenda completa e marcar folga */
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ---------- Grade do calendário ---------- */
+/* minmax(0, 1fr) impede que o conteúdo estique as colunas no celular */
+.wd,
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.wd {
+  margin-top: 28px;
+  border: 2px solid var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.wd span {
+  padding: 10px 2px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+/* borda externa clara; as linhas internas são só top/left das células,
+   assim nenhuma borda fica duplicada nas bordas da grade */
+.cal {
+  border: 2px solid var(--paper);
+  border-top: 0;
+}
+
+.cal > * {
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.cal > :nth-child(-n + 7) {
+  border-top: 0;
+}
+
+.cal > :nth-child(7n + 1) {
+  border-left: 0;
+}
+
+.blank {
+  background: #121315;
+}
+
+/* ---------- Células dos dias ---------- */
+.cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 6px;
+  overflow: hidden;
+  text-align: left;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  font: 600 12px var(--body);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cell b {
+  font: 800 22px/1 var(--display);
+}
+
+.cell .cnt {
+  display: none; /* só aparece em telas maiores */
+}
+
+.cell .bar {
+  display: block;
+  height: 4px;
+  background: var(--line);
+}
+
+.cell .bar i {
+  display: block;
+  height: 100%;
+  background: var(--paper);
+}
+
+@media (hover: hover) {
+  .cell:not(.closed):not(.today):hover {
+    background: var(--slate);
+  }
+}
+
+/* dia que já passou: cinza em vez de transparência (a opacidade deixava 2,8:1) */
+.cell.past {
+  color: var(--ash);
+}
+
+.cell.past .bar i {
+  background: var(--ash);
+}
+
+/* dia inteiro de folga: listrado, mas ainda dá para clicar e ver/remover */
+.cell.off {
+  background: repeating-linear-gradient(135deg, var(--ink) 0 7px, var(--slate) 7px 8px);
+  color: var(--ash);
+}
+
+.cell.closed {
+  background: #121315;
+  color: var(--ash);
+  cursor: default;
+}
+
+/* hoje: a célula vira papel, como as faixas claras do site */
+.cell.today {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.cell.today .bar {
+  background: var(--mist);
+}
+
+.cell.today .bar i {
+  background: var(--ink);
+}
+
+/* dia selecionado */
+.cell[aria-pressed="true"] {
+  outline: 3px solid var(--paper);
+  outline-offset: -3px;
+}
+
+.cell.today[aria-pressed="true"] {
+  outline-color: var(--ink);
+}
+
+/* foco do teclado: dentro da célula, para não ficar escondido pelos vizinhos */
+.cell:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: -3px;
+  position: relative;
+  z-index: 1;
+}
+
+.cell.today:focus-visible {
+  outline-color: var(--ink);
+}
+
+/* ---------- Telas maiores ---------- */
+@media (min-width: 700px) {
+  .cell {
+    min-height: 100px;
+    padding: 10px;
+  }
+
+  .cell b {
+    font-size: 32px;
+  }
+
+  .cell .cnt {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell {
+    transition: none;
+  }
+}

@@ -115,8 +115,10 @@
 
   // Confere conflitos (se der) e pergunta antes de seguir; rejeita com "cancelado" se o usuário desistir
   function confirmaConflitos(folga) {
-    return B.carregar().catch(function () {}).then(function () {
-      var lista = B.pronto() ? conflitos(folga) : [];
+    // baixa só os agendamentos do período da folga
+    var de = folga.inicio.slice(0, 10), ate = folga.fim.slice(0, 10);
+    return B.carregar(de, ate).catch(function () {}).then(function () {
+      var lista = B.pronto(de, ate) ? conflitos(folga) : [];
       if (lista.length && !confirm(
         "Há " + lista.length + " agendamento(s) nesse período:\n\n" +
         lista.slice(0, 8).join("\n") + (lista.length > 8 ? "\n…" : "") +

@@ -4,12 +4,30 @@
    Identidade visual igual à do site (Britos_Barbearia_imagem):
    grafite e papel, Big Shoulders Display em maiúsculas, emblema do barbudo
    e o divisor de triângulos invertidos.
-   Fontes (colocar no <head> do HTML, antes deste CSS):
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+   Fontes: hospedadas no próprio projeto (pasta fonts/), sem depender do Google.
+   Cada uma é um arquivo só (fonte variável) com todos os pesos, só com os
+   caracteres latinos (português incluso). No <head>, antes deste CSS:
+   <link rel="preload" href="fonts/big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
+   <link rel="preload" href="fonts/montserrat.woff2" as="font" type="font/woff2" crossorigin>
    Também usar: <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
    ========================================================== */
+
+/* ---------- Fontes (licença OFL, textos em fonts/*-OFL.txt) ---------- */
+@font-face {
+  font-family: "Big Shoulders Display";
+  font-style: normal;
+  font-weight: 800 900;
+  font-display: swap;
+  src: url("../fonts/big-shoulders-display.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/montserrat.woff2") format("woff2");
+}
 
 /* ---------- Variáveis e base ---------- */
 :root {
@@ -468,7 +486,7 @@ li.folga {
   margin-left: 8px;
   padding: 2px 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border: 1px solid currentColor;
@@ -493,6 +511,24 @@ li.next .badge {
 .empty {
   padding: 28px 0;
   color: var(--ash);
+}
+
+/* "Atualizado às 14:32"; sem conexão, avisa que os dados na tela são antigos */
+.atualizado {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--ash);
+}
+
+.atualizado:empty {
+  display: none;
+}
+
+.atualizado.erro {
+  padding-left: 10px;
+  border-left: 3px solid var(--paper);
+  color: var(--paper);
+  font-weight: 700;
 }
 
 /* aviso quando o JavaScript está desligado (sem ele o painel fica vazio) */

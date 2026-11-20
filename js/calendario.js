@@ -17,6 +17,20 @@
   var hoje0 = new Date();
   var state = { mes: new Date(hoje0.getFullYear(), hoje0.getMonth(), 1), sel: startDay(hoje0) };
 
+  // Se o mês na tela ainda não foi baixado, pede ao servidor (uma vez) e devolve
+  // true enquanto espera. Só o mês em uso é baixado, não o histórico todo.
+  var pedido = "";
+  function carregando() {
+    var y = state.mes.getFullYear(), m = state.mes.getMonth();
+    if (B.pronto(key(new Date(y, m, 1)), key(new Date(y, m + 1, 0)))) return false;
+    var p = B.periodoDoMes(state.mes);
+    if (pedido !== p.de) {
+      pedido = p.de;
+      B.carregar(p.de, p.ate).then(render, render);
+    }
+    return true;
+  }
+
   function render() {
     var y = state.mes.getFullYear(), m = state.mes.getMonth();
     var off = (new Date(y, m, 1).getDay() + 6) % 7;
@@ -25,6 +39,7 @@
     var hojeK = key(agora);
     var hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
     var box = $("cal"), tot = 0, rec = 0, top = null;
+    var semDados = carregando();   // enquanto o mês chega, as células mostram "…"
 
     txt("titulo-mes", MS[m] + " de " + y);
     box.innerHTML = "";
@@ -58,11 +73,11 @@
           if (bk.length && (!top || bk.length > top.n)) top = { n: bk.length, d: dt };
 
           if (folgaInteira) b.className += " off";
-          var cnt = folgaInteira ? "Folga" : bk.length + " marcados" + (temFolga ? " · folga" : "");
+          var cnt = semDados ? "…" : folgaInteira ? "Folga" : bk.length + " marcados" + (temFolga ? " · folga" : "");
           b.innerHTML = "<b>" + dt.getDate() + "</b><span class='cnt'>" + cnt + "</span>" +
             "<span class='bar'><i style='width:" + pct + "%'></i></span>";
-          b.setAttribute("aria-label", DS[dt.getDay()] + ", " + dt.getDate() + ", " +
-            (folgaInteira ? "folga" : bk.length + " agendamentos" + (temFolga ? ", folga em parte do dia" : "")));
+          b.setAttribute("aria-label", DS[dt.getDay()] + ", " + dt.getDate() + (semDados ? "" : ", " +
+            (folgaInteira ? "folga" : bk.length + " agendamentos" + (temFolga ? ", folga em parte do dia" : ""))));
           b.setAttribute("aria-pressed", key(dt) === key(state.sel));
           b.onclick = function () { state.sel = dt; render(); mostraDetalhe(); };
         }
@@ -70,10 +85,10 @@
       })(new Date(y, m, d));
     }
 
-    txt("s-qtd", tot);
-    txt("s-rec", brl(rec));
-    txt("s-cheio", top ? top.d.getDate() + " de " + MS[m].slice(0, 3) : "-");
-    txt("s-cheio2", top ? top.n + " agendamentos" : "");
+    txt("s-qtd", semDados ? "…" : tot);
+    txt("s-rec", semDados ? "…" : brl(rec));
+    txt("s-cheio", semDados ? "…" : top ? top.d.getDate() + " de " + MS[m].slice(0, 3) : "-");
+    txt("s-cheio2", !semDados && top ? top.n + " agendamentos" : "");
 
     detalhe();
   }
@@ -112,8 +127,8 @@
     ul.innerHTML = "";
 
     // ainda carregando ou servidor fora do ar: mostra o aviso no lugar da lista
-    if (!B.pronto()) {
-      txt("det-info", "Sem dados do servidor ainda.");
+    if (!B.pronto(k)) {
+      txt("det-info", "Buscando os dados deste dia…");
       B.aviso(ul);
       return;
     }
@@ -166,20 +181,19 @@
     render();
   };
 
-  // depois de remover uma folga, busca de novo para liberar os horários
+  // depois de editar ou remover algo, busca de novo o mesmo período
   function recarregar() { B.carregar().then(render, render); }
 
-  render();                       // mostra "Carregando…" enquanto busca no servidor
-  recarregar();
+  render();                       // mostra "…" e pede o mês ao servidor
 
-  // A cada minuto: busca de novo no servidor (agendamentos novos do site);
-  // na virada do dia move a marcação de "hoje";
+  // A cada minuto (só com a página visível): busca de novo no servidor (agendamentos
+  // novos do site); na virada do dia move a marcação de "hoje";
   // se o dia escolhido é hoje, atualiza "Próximo" e "Concluído" quando um horário passa.
   // Se a busca falhar, continua mostrando os últimos dados que vieram.
   var ultimoDia = key(new Date());
-  setInterval(function () {
+  B.aCadaMinuto(function () {
     B.carregar().then(atualiza, function () { atualiza(false); });
-  }, 60000);
+  });
 
   function atualiza(mudou) {
     var k = key(new Date());

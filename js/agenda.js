@@ -45,6 +45,28 @@
   }
   var ultimaSituacao = "";
 
+  /* ---------- Dados do período ---------- */
+  // Segunda a sábado da semana do dia escolhido (o que a tela mostra)
+  function semana() {
+    var d = state.dia;
+    var seg = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    return { de: key(seg), ate: key(new Date(seg.getFullYear(), seg.getMonth(), seg.getDate() + 5)) };
+  }
+
+  // Se a semana na tela ainda não foi baixada, pede o mês dela ao servidor (uma vez)
+  // e devolve true enquanto espera. Só o período em uso é baixado, não o histórico todo.
+  var pedido = "";
+  function carregando() {
+    var s = semana();
+    if (B.pronto(s.de, s.ate)) return false;
+    var p = B.periodoDoMes(state.dia);
+    if (pedido !== p.de) {
+      pedido = p.de;
+      B.carregar(p.de, p.ate).then(render, render);
+    }
+    return true;
+  }
+
   /* ---------- Renderização ---------- */
   function render() {
     var d = state.dia;
@@ -62,6 +84,15 @@
     txt("aviso", "Hoje é domingo e a barbearia está fechada. Mostrando a agenda de segunda.");
 
     $("marcar-folga").href = "folgas.html?dia=" + k;
+
+    // ainda buscando a semana (ou servidor fora do ar): resumo com "…" e aviso na lista
+    if (carregando()) {
+      ["s-qtd", "s-rec", "s-prox"].forEach(function (id) { txt(id, "…"); });
+      ["s-livres", "s-prox2"].forEach(function (id) { txt(id, ""); });
+      B.aviso($("lista"));
+      week(true);
+      return;
+    }
 
     var all = agendamentos(d);
     var book = B.marcados(all);
@@ -86,13 +117,6 @@
     var ul = $("lista");
     ul.innerHTML = "";
     var c = 0;
-
-    // ainda carregando ou servidor fora do ar: mostra o aviso no lugar da lista
-    if (!B.pronto()) {
-      B.aviso(ul);
-      week();
-      return;
-    }
 
     all.forEach(function (a) {
       if (state.f === "ocupados" && a.livre) return;
@@ -132,8 +156,8 @@
     ultimaSituacao = situacao();
   }
 
-  // Faixa com os dias da semana (segunda a sábado)
-  function week() {
+  // Faixa com os dias da semana (segunda a sábado); semDados = ainda carregando
+  function week(semDados) {
     var box = $("week");
 
     // guarda qual dia estava com o foco do teclado para devolver depois
@@ -152,12 +176,13 @@
         b.type = "button";
         b.className = "chip day";
         b.setAttribute("aria-pressed", key(d) === key(state.dia));
-        b.setAttribute("aria-label", DS[d.getDay()] + ", " + d.getDate() + ", " +
-          (folga ? "folga" : n + " agendamentos"));
+        var resumo = semDados ? "…" : (folga ? "folga" : n + " marcados");
+        b.setAttribute("aria-label", DS[d.getDay()] + ", " + d.getDate() +
+          (semDados ? "" : ", " + (folga ? "folga" : n + " agendamentos")));
         b.innerHTML =
           "<b>" + d.getDate() + "</b>" +
           DS[d.getDay()].slice(0, 3) +
-          "<i>" + (folga ? "folga" : n + " marcados") + "</i>";
+          "<i>" + resumo + "</i>";
         b.onclick = function () { state.dia = d; render(); };
 
         box.appendChild(b);
@@ -187,22 +212,21 @@
     };
   });
 
-  // depois de remover uma folga, busca de novo para liberar os horários
+  // depois de editar ou remover algo, busca de novo o mesmo período
   function recarregar() { B.carregar().then(render, render); }
 
-  render();                       // mostra "Carregando…" enquanto busca no servidor
-  recarregar();
+  render();                       // mostra "Carregando…" e pede a semana ao servidor
 
-  // Painel fica aberto o dia todo. A cada minuto:
+  // Painel fica aberto o dia todo. A cada minuto (só com a página visível):
   // - busca de novo no servidor, para aparecerem os agendamentos novos do site;
   // - na virada do dia, quem estava vendo "hoje" passa para o novo dia;
   // - só redesenha quando algo mudou (dados novos, um horário passou ou o dia virou),
   //   para não tirar o foco do teclado à toa.
   var ultimoDia = diaAtual();
-  setInterval(function () {
+  B.aCadaMinuto(function () {
     // se falhar, continua mostrando os últimos dados que vieram
     B.carregar().then(function (mudou) { atualiza(mudou); }, function () { atualiza(false); });
-  }, 60000);
+  });
 
   function atualiza(forcar) {
     var k = diaAtual();

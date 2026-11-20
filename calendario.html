@@ -7,14 +7,15 @@
 <meta name="description" content="Painel interno da Barbearia Britos com a visão mensal dos agendamentos.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0c0d0e">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://barbearia-britos-back.vercel.app" crossorigin>
+<link rel="preload" href="fonts/big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/montserrat.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" type="image/png" href="img/emblema-branco.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Britos">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/calendario.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/calendario.css?v=2">
 </head>
 <body>
 <header>
@@ -39,6 +40,7 @@
       <button class="chip" id="next" type="button" aria-label="Próximo mês">Próximo</button>
       <h2 id="titulo-mes" aria-live="polite"></h2>
     </div>
+    <p class="atualizado" id="atualizado"></p>
 
     <div class="stats" role="group" aria-label="Resumo do mês">
       <div class="stat"><p>Agendamentos no mês</p><strong id="s-qtd">0</strong></div>
@@ -58,7 +60,7 @@
     <ul id="lista"></ul>
   </div>
 </main>
-<script src="js/script.js" defer></script>
-<script src="js/calendario.js" defer></script>
+<script src="js/script.js?v=2" defer></script>
+<script src="js/calendario.js?v=2" defer></script>
 </body>
 </html>

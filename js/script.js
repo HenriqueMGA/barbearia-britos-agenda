@@ -131,7 +131,20 @@
   var porDia = {};           // "AAAA-MM-DD" -> agendamentos do dia
   var folgasPorDia = {};     // "AAAA-MM-DD" -> trechos de folga do dia
   var versao = "";           // resposta anterior, para saber se algo mudou
-  var estado = "carregando"; // "carregando" | "ok" | "erro"
+  var periodo = null;        // { de, ate } que está em porDia/folgasPorDia
+  var alvo = null;           // { de, ate } pedido por último (pode ainda estar chegando)
+  var pedidoAtual = 0;       // para ignorar respostas de pedidos antigos
+  var falhou = false;        // a última busca deu erro
+  var ultimaOk = null;       // hora da última busca que deu certo
+
+  // Período que a página precisa para um mês: do dia 1 ao último, com uma semana
+  // de folga para cada lado (a faixa da semana da agenda pode cruzar o mês)
+  function periodoDoMes(d) {
+    return {
+      de: key(new Date(d.getFullYear(), d.getMonth(), 1 - 7)),
+      ate: key(new Date(d.getFullYear(), d.getMonth() + 1, 7))
+    };
+  }
 
   // "2026-11-10T14:00" ou "2026-11-10" -> { data, min }; sem hora, vale o dia todo
   function momento(s, ehFim) {
@@ -167,14 +180,30 @@
     return out;
   }
 
-  // Busca agendamentos, serviços (para preço e duração) e folgas.
+  // Busca os agendamentos e as folgas de um período ("AAAA-MM-DD"), mais os serviços
+  // (para preço e duração; esses vêm do cache depois da primeira vez).
+  // Sem argumentos, busca de novo o último período pedido.
   // Resolve com true quando os dados mudaram desde a última busca.
-  // Se falhar depois de já ter carregado, mantém os dados anteriores.
-  function carregar() {
-    return Promise.all([pegar("/api/agendamentos"), pegar("/api/servicos"), pegar("/api/folgas")]).then(function (res) {
-      var lista = res[0], servicos = res[1], folgas = res[2];
-      var nova = JSON.stringify(res);
-      estado = "ok";
+  // Se falhar, mantém os dados anteriores na tela.
+  function carregar(de, ate) {
+    if (de) alvo = { de: de, ate: ate || de };
+    var p = alvo, n = ++pedidoAtual;
+    if (!p) return Promise.reject(new Error("Nenhum período pedido."));
+    var q = "?de=" + p.de + "&ate=" + p.ate;
+
+    return Promise.all([pegar("/api/agendamentos" + q), servicos(), pegar("/api/folgas" + q)]).then(function (res) {
+      if (n !== pedidoAtual) return false;   // chegou depois de um pedido mais novo: descarta
+
+      // se o backend ainda não filtrar por período, o filtro acontece aqui
+      var lista = res[0].filter(function (a) { return a.data >= p.de && a.data <= p.ate; });
+      var servicos = res[1], folgas = res[2];
+
+      periodo = p;
+      falhou = false;
+      ultimaOk = new Date();
+      mostraStatus();
+
+      var nova = JSON.stringify([p, lista, folgas]);
       if (nova === versao) return false;
       versao = nova;
 
@@ -212,9 +241,31 @@
       });
       return true;
     }, function (e) {
-      if (!versao) estado = "erro";
+      if (n === pedidoAtual) {
+        falhou = true;
+        mostraStatus();
+      }
       throw e;
     });
+  }
+
+  // "Atualizado às 14:32" ou, sem conexão, de quando são os dados na tela.
+  // Aparece no elemento #atualizado, se a página tiver um.
+  function mostraStatus() {
+    var e = $("atualizado");
+    if (!e) return;
+    var h = ultimaOk ? pad(ultimaOk.getHours()) + ":" + pad(ultimaOk.getMinutes()) : "";
+    e.textContent = !falhou
+      ? (h ? "Atualizado às " + h : "")
+      : (h ? "Sem conexão com o servidor · mostrando dados das " + h : "");
+    e.className = "atualizado" + (falhou ? " erro" : "");
+  }
+
+  // Roda fn a cada minuto, mas só com a página visível: com o celular no bolso ou
+  // a aba em segundo plano, não gasta bateria nem dados. Ao voltar, atualiza na hora.
+  function aCadaMinuto(fn) {
+    setInterval(function () { if (!document.hidden) fn(); }, 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) fn(); });
   }
 
   // Agendamentos, folgas e horários livres do dia, em ordem de hora.
@@ -247,12 +298,16 @@
     return (folgasPorDia[key(d)] || []).some(function (f) { return f.inteiro; });
   }
 
-  function pronto() { return estado === "ok"; }
+  // Os dados do período estão carregados? Sem argumentos: algum período está carregado?
+  function pronto(de, ate) {
+    if (!periodo) return false;
+    return !de || (periodo.de <= de && (ate || de) <= periodo.ate);
+  }
 
   // Mensagem na lista enquanto carrega ou se o servidor não responde
   function aviso(ul) {
     ul.innerHTML = "";
-    ul.appendChild(el("li", "empty", estado === "erro"
+    ul.appendChild(el("li", "empty", falhou
       ? "Não foi possível carregar os agendamentos. Verifique se o servidor está ligado. Nova tentativa em 1 minuto."
       : "Carregando agendamentos…"));
   }
@@ -531,6 +586,11 @@
     return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
+  // Painel instalável e abrindo sem internet (precisa de https ou localhost)
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+
   window.Britos = {
     DS: DS,
     MS: MS,
@@ -540,6 +600,8 @@
     data: data,
     startDay: startDay,
     carregar: carregar,
+    periodoDoMes: periodoDoMes,
+    aCadaMinuto: aCadaMinuto,
     agendamentos: agendamentos,
     marcados: marcados,
     livres: livres,

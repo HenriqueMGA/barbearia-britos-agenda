@@ -57,21 +57,40 @@ js/
 img/
   emblema-branco.png     Emblema da marca (logo e ícone da aba)
   apple-touch-icon.png   Ícone ao salvar o painel na tela inicial do iPhone
+  icone-192.png, icone-512.png   Ícones do app instalado (Android e computador)
+fonts/
+  big-shoulders-display.woff2, montserrat.woff2   Fontes hospedadas no projeto (licença OFL)
+  *-OFL.txt              Textos da licença das fontes (obrigatórios ao redistribuí-las)
+manifest.webmanifest     Dados do app instalável (nome, cores, ícones)
+sw.js                    Service worker: deixa o painel instalável e abrindo sem internet
 ```
 
 Cada página carrega primeiro o `js/script.js` e depois o script dela. Essa ordem importa: o script da página usa o que o `script.js` coloca em `window.Britos`.
+
+## Ao publicar uma nova versão
+
+- **Mudou CSS ou JavaScript?** Aumente o número do `?v=` nos `<link>` e `<script>` das três páginas, por exemplo de `?v=2` para `?v=3`. Assim o navegador baixa a versão nova em vez de usar a guardada.
+- **Mudou o `sw.js`?** Troque também o `VERSAO` dentro dele, para os celulares descartarem a cópia antiga.
+
+## Desempenho
+
+- **Só o período em uso:** o painel busca os agendamentos e as folgas do mês na tela, com uma semana a mais de cada lado, e não o histórico todo. Os serviços são buscados uma vez por página.
+- **Atualização automática:** acontece a cada minuto, e só com a página visível. Com a aba em segundo plano ou o celular bloqueado, não gasta bateria nem dados, e ao voltar atualiza na hora.
+- **Indicador de atualização:** a tela mostra "Atualizado às HH:MM". Sem conexão, avisa que os dados na tela são antigos.
+- **Fontes:** são hospedadas no projeto, com preload, sem depender do Google Fonts.
+- **App instalável:** no Android e no computador, o navegador oferece "Instalar app". No iPhone, use "Compartilhar → Adicionar à Tela de Início". Sem internet, o app abre, mas avisa que não conseguiu buscar os dados. Os dados dos clientes nunca ficam guardados no aparelho.
 
 ## Rotas da API usadas
 
 | Método | Rota | Uso no painel |
 |---|---|---|
-| GET | `/api/agendamentos` | Lista de agendamentos |
+| GET | `/api/agendamentos?de=&ate=` | Agendamentos do período na tela (se o backend ignorar o filtro, o painel filtra) |
 | PATCH | `/api/agendamentos/:id` | Editar agendamento (só os campos que mudaram) |
 | DELETE | `/api/agendamentos/:id` | Remover agendamento |
 | GET | `/api/servicos` | Preço e duração de cada serviço |
 | GET | `/api/barbeiros?servico=<id>` | Barbeiros que fazem o serviço |
 | GET | `/api/horarios-disponiveis?data=&servico=&barbeiro=` | Horários livres ao editar um agendamento |
-| GET | `/api/folgas` | Lista de folgas (aceita `barbeiro`, `de` e `ate`) |
+| GET | `/api/folgas?de=&ate=` | Folgas do período na tela (aceita também `barbeiro`) |
 | POST | `/api/folgas` | Marcar folga |
 | PATCH | `/api/folgas/:id` | Editar folga |
 | DELETE | `/api/folgas/:id` | Remover folga |
